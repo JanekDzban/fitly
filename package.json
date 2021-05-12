@@ -1,0 +1,21 @@
+{
+  "name": "fitly",
+  "version": "1.0.0",
+  "description": "Import diet data from dietly.pl to fitatu.com",
+  "main": "fitly.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm install && node fitly.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "got": "^11.8.2",
+    "lodash": "^4.17.21",
+    "querystring": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.41"
+  }
+}
