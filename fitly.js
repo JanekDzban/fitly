@@ -7,7 +7,7 @@ const fitatu = require('./fitatu');
         day = new Date().toISOString().slice(0, 10);
     }
     const menu = await getMenuFromDietly(day);
-    addMenuToFitatu(menu, day);
+    await addMenuToFitatu(menu, day);
 })();
 
 async function getMenuFromDietly(date) {

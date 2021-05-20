@@ -46,14 +46,10 @@ module.exports.logout = async function() {
 
 module.exports.addMeals = async function(menu, date) {
     const products = mappings.mapDietlyToFitatuProducts(menu);
-    products.forEach(async function(product) {
+    for(product of products) {
         product.id = await addProduct(product);
         await addMeal(product, date);
-    });
-    /*const product = products[0];
-    product.name = "TEST"
-    product.id = await addProduct(product);
-    await addMeal(product, date);*/
+    }
 }
 
 async function addMeal(product, date) {
