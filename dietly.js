@@ -13,7 +13,7 @@ var settings = {
 settings.endpoints = {
     loginEndpoint: settings.url + '/auth/login',
     logoutEndpoint: settings.url + '/auth/logout',
-    ordersEndpoint: settings.url + '/company/customer/orders', //+ active order Id
+    ordersEndpoint: settings.url + '/company/customer/order', //+ active order Id
     menuEndpoint: settings.url + '/company/general/menus/delivery', //+ deliveryId
     companyEndpoint: settings.url + '/profile/companies/active'
 };
@@ -53,15 +53,14 @@ module.exports.logout = async function() {
 
 module.exports.getMenu = async function(date) {
     const orderId = await getActiveOrderId();
-    const deliveries = await getDeliveries(orderId[0]);
+    const deliveries = await getDeliveries(orderId.pop());
     const deliveryToday = lodash.find(deliveries, function(o) {return o.date === date});
     if(!deliveryToday) {
         return null;
     }
     const menuData = await getMenuData(deliveryToday.deliveryId);
-    const menu = lodash.map(menuData, function(o) {return lodash.pick(o, settings.menuContent)});
+    const menu = lodash.map(menuData.deliveryMenuMeal, function(o) {return lodash.pick(o, settings.menuContent)});
     menu.forEach(function(entry) {
-        entry.meal = entry.meal.name;
         entry.brand = activeCompany.fullName;
     });
     return sortMenu(menu);
@@ -70,7 +69,7 @@ module.exports.getMenu = async function(date) {
 function sortMenu(menu) {
     var sortedMenu = [];
     settings.mealsOrder.forEach(function(meal) {
-        var entry = lodash.find(menu, function(o) {return o.meal === meal});
+        var entry = lodash.find(menu, function(o) {return o.mealName === meal});
         sortedMenu.push(entry);
     });
     return sortedMenu;
@@ -138,7 +137,7 @@ async function getMenuData(deliveryId) {
     };
     try {
         const menu = await got.get(`${settings.endpoints.menuEndpoint}/${deliveryId}`, options).json();
-        console.log("Got menu")
+        console.log("Got menu");
         return menu;
     } catch(e) {
         onError(e);

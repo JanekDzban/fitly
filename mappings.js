@@ -11,8 +11,8 @@ module.exports.dietlyToFitatuMeal = {
 };
 
 module.exports.dietlyToFitatuProduct = {
-    'meal': '_meal',
-    'name': 'name',
+    'mealName': '_meal',
+    'menuMealName': 'name',
     'brand': 'brand',
     'weight': '_weight',
     'calories': 'energy',
