@@ -3,6 +3,6 @@
 
 ### How to run:
 * Clone the repository
-* Setup your credentials for dietly and fitatu in `.env_example` file (fitatu user id can be obtained from login response for fitatu.com/login endpoint)
+* Setup your credentials for dietly and fitatu in `.env_example` file
 * Rename `.env_example` file to `.env` 
 * Inside `fitatu` folder run `npm start {date_to_sync}` (e.g. `npm start 2021-05-13`)

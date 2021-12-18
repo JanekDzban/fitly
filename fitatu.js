@@ -1,13 +1,13 @@
 require('dotenv').config();
 const got = require('got');
 const lodash = require('lodash');
+const jwtDecode = require('jwt-decode');
 const mappings = require('./mappings');
 
 var settings = {
     url: 'https://pl-pl.fitatu.com/api',
     username: process.env.FITATU_USER,
     password: process.env.FITATU_PASS,
-    userid: process.env.FITATU_USER_ID,
     mealQuantity: parseFloat(process.env.FITATU_MEAL_SIZE),
     options: {
         headers: {
@@ -34,6 +34,7 @@ module.exports.login = async function() {
     try {
         const response = await got.post(settings.endpoints.loginEndpoint, options).json();
         settings.options.headers.authorization = 'Bearer ' + response.token;
+        settings.userid = jwtDecode(response.token).id;
         console.log(`Login successful (${response.token.substring(0,16)}...)`);
     } catch(e) {
         onError(e);
