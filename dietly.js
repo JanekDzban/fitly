@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({path: process.argv[3] || '.env'});
 const got = require('got');
 const querystring = require('querystring');
 const lodash = require('lodash');

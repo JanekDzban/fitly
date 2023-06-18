@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({path: process.argv[3] || '.env'});
 const got = require('got');
 const lodash = require('lodash');
 const jwtDecode = require('jwt-decode');

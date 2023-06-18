@@ -2,10 +2,7 @@ const dietly = require('./dietly');
 const fitatu = require('./fitatu');
 
 (async() => {
-    const day = process.argv[2];
-    if(day == null) {
-        day = new Date().toISOString().slice(0, 10);
-    }
+    const day = process.argv[2] || new Date().toISOString().slice(0, 10);
     const menu = await getMenuFromDietly(day);
     await addMenuToFitatu(menu, day);
 })();
@@ -15,7 +12,7 @@ async function getMenuFromDietly(date) {
     const menu = await dietly.getMenu(date);
     await dietly.logout();
 
-    if(menu) {
+    if (menu) {
         console.log('Menu: ', menu);
     } else {
         console.log(`There is no delivery planned for ${date}`);
