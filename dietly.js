@@ -33,7 +33,7 @@ module.exports.login = async function() {
     console.log(`Logging to dietly... (${settings.username})`);
     try {
         const response = await got.post(settings.endpoints.loginEndpoint, options);
-        const sessionIdCookie = lodash.find(response.headers['set-cookie'], function(o) {return o.includes('JSESSIONID')});
+        const sessionIdCookie = lodash.find(response.headers['set-cookie'], function(o) {return o.includes('SESSION')});
         sessionId = sessionIdCookie.split(';')[0];
         console.log(`Login successful (${sessionId})`);
     } catch (e) {
