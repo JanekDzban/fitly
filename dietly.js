@@ -5,7 +5,7 @@ const lodash = require('lodash');
 const mappings = require('./mappings');
 
 var settings = {
-    url: 'https://panel.dietly.pl/api',
+    url: 'https://dietly.pl/api',
     username: process.env.DIETLY_USER,
     password: process.env.DIETLY_PASS,
     menuContent: Object.keys(mappings.dietlyToFitatuProduct)
@@ -15,9 +15,8 @@ settings.endpoints = {
     logoutEndpoint: settings.url + '/auth/logout',
     ordersEndpoint: settings.url + '/company/customer/order', //+ active order Id
     menuEndpoint: settings.url + '/company/general/menus/delivery', //+ deliveryId
-    companyEndpoint: settings.url + '/profile/companies/active'
+    activeOrderEndpoint: settings.url + '/profile/profile-order/active-ids'
 };
-settings.endpoints.activeOrderEndpoint = settings.endpoints.ordersEndpoint + '/active-ids';
 settings.mealsOrder = Object.keys(mappings.dietlyToFitatuMeal);
 
 var activeCompany = {};
@@ -35,7 +34,7 @@ module.exports.login = async function() {
         const response = await got.post(settings.endpoints.loginEndpoint, options);
         const sessionIdCookie = lodash.find(response.headers['set-cookie'], function(o) {return o.includes('SESSION')});
         sessionId = sessionIdCookie.split(';')[0];
-        console.log(`Login successful (${sessionId})`);
+        console.log(`Login successful (${sessionId.substring(0,16)}...)`);
     } catch (e) {
         onError(e);
     }
@@ -52,58 +51,44 @@ module.exports.logout = async function() {
 }
 
 module.exports.getMenu = async function(date) {
-    const orderId = await getActiveOrderId();
-    const deliveries = await getDeliveries(orderId.pop());
+    const order = await getActiveOrder();
+    activeCompany = lodash.pick(order, 'companyName', 'companyFullName');
+    const deliveries = await getDeliveries(order.orderId);
     const deliveryToday = lodash.find(deliveries, function(o) {return o.date === date});
-    if(!deliveryToday) {
+    if (!deliveryToday) {
         return null;
     }
     const menuData = await getMenuData(deliveryToday.deliveryId);
     const menu = lodash.map(menuData.deliveryMenuMeal, function(o) {return lodash.pick(o, settings.menuContent)});
     menu.forEach(function(entry) {
-        entry.brand = activeCompany.fullName;
+        entry.brand = order.companyFullName;
     });
     return sortMenu(menu);
 }
 
 function sortMenu(menu) {
-    var sortedMenu = [];
+    const sortedMenu = [];
     settings.mealsOrder.forEach(function(meal) {
-        var entry = lodash.find(menu, function(o) {return o.mealName === meal});
-        sortedMenu.push(entry);
+        let entry = lodash.find(menu, function(o) {return o.mealName === meal});
+        if (entry !== undefined) {
+            sortedMenu.push(entry);
+        }
     });
     return sortedMenu;
 }
 
-async function getActiveCompany() {
+async function getActiveOrder() {
+    console.log('Getting active order...');
     const options = {
         headers: {
-            'cookie': sessionId
-        }
-    }
-    console.log("Getting active company data...");
-    try {
-        const companyData = await got.get(settings.endpoints.companyEndpoint, options).json();
-        console.log(`Got data about ${companyData.fullName}`)
-        return lodash.pick(companyData, ['companyName','fullName']);
-    } catch (e) {
-        onError(e);
-    }
-}
-
-async function getActiveOrderId() {
-    console.log('Getting active order id...');
-    activeCompany = await getActiveCompany();
-    const options = {
-        headers: {
-            'company-id': activeCompany.companyName,
             'cookie': sessionId
         }
     };
     try {
-        const activeOrderId = await got.get(settings.endpoints.activeOrderEndpoint, options).json();
-        console.log('Got active order id: ', activeOrderId);
-        return activeOrderId;
+        const orders = await got.get(settings.endpoints.activeOrderEndpoint, options).json();
+        const order = orders[0];
+        console.log(`Got active order id ${order.orderId} for company ${order.companyFullName}`);
+        return order;
     } catch (e) {
         onError(e);
     }
