@@ -47,7 +47,7 @@ module.exports.logout = async function() {
 
 module.exports.addMeals = async function(menu, date) {
     const products = mappings.mapDietlyToFitatuProducts(menu);
-    for(product of products) {
+    for (product of products) {
         product.id = await addProduct(product);
         await addMeal(product, date);
     }
@@ -83,7 +83,7 @@ async function addProduct(product) {
         const response = await got.post(settings.endpoints.addProductEndpoint, settings.options).json();
         console.log(`Product added successfully (${response.id})`);
         product.id = response.id;
-        //await addIngredients(product);
+        await addIngredients(product);
         return response.id;
     } catch(e) {
         onError(e);
@@ -96,7 +96,6 @@ async function addIngredients(product) {
         propertyName: 'rawIngredients',
         propertyValue: product._rawIngredients
     };
-    console.log(options);
     console.log('Adding ingredients data...');
     try {
         const url = `${settings.endpoints.addProductEndpoint}/${product.id}/${settings.endpoints.addIngredientsUrl}`;

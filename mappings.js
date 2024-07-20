@@ -27,10 +27,11 @@ module.exports.dietlyToFitatuProduct = {
 };
 
 module.exports.mapDietlyToFitatuProducts = function(menu) {
-    var products = [];
+    const products = [];
+    menu = lodash.compact(menu);
     menu.forEach(function(entry) {
-        var product = {};
-        for(const [dietlyProp, fitatuProp] of Object.entries(module.exports.dietlyToFitatuProduct)) {
+        const product = {};
+        for (const [dietlyProp, fitatuProp] of Object.entries(module.exports.dietlyToFitatuProduct)) {
             lodash.set(product, fitatuProp, entry[dietlyProp]);
             product[fitatuProp] = entry[dietlyProp];
         }
@@ -40,6 +41,7 @@ module.exports.mapDietlyToFitatuProducts = function(menu) {
             weight: Math.round(product._weight)
         }];
         delete product._weight;
+        product._rawIngredients = lodash.join(lodash.map(product._rawIngredients, 'name'), ',');
         products.push(product);
     });
     return products;
