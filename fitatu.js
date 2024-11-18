@@ -2,6 +2,7 @@ require('dotenv').config({path: process.argv[3] || '.env'});
 const got = require('got');
 const lodash = require('lodash');
 const jwtDecode = require('jwt-decode');
+const uuid = require('uuid');
 const mappings = require('./mappings');
 
 var settings = {
@@ -21,7 +22,7 @@ settings.endpoints = {
     'loginEndpoint': settings.url + '/login', //returns token
     'addProductEndpoint': settings.url + '/products',
     'addIngredientsUrl': 'proposals', //product endpoint + productId + actual endpoint
-    'addMealEndpoint': settings.url + '/diet-plan' // +/userid/day/date/mealname
+    'addMealEndpoint': settings.url + '/diet-plan' // +/userid/days
 };
 
 module.exports.login = async function() {
@@ -55,15 +56,27 @@ module.exports.addMeals = async function(menu, date) {
 
 async function addMeal(product, date) {
     const options = settings.options;
-    options.json = {
-        isUserOwnItem: 'true',
+    const mealName = mappings.dietlyToFitatuMeal[product._meal];
+    const item = {
+        planDayDietItemId: uuid.v1(),
         measureId: 2,
         measureQuantity: settings.mealQuantity,
-        itemId: product.id,
-        type: 'PRODUCT'
+        productId: product.id,
+        foodType: 'PRODUCT',
+        source: 'API'
     }
-    const mealName = mappings.dietlyToFitatuMeal[product._meal];
-    const url = `${settings.endpoints.addMealEndpoint}/${settings.userid}/day/${date}/${mealName}`;
+    options.json = {
+        [date]: {
+            dietPlan: {
+                [mealName]: {
+                    items: [
+                        item
+                    ]
+                }
+            }
+        }
+    }
+    const url = `${settings.endpoints.addMealEndpoint}/${settings.userid}/days`;
     console.log(`Adding product to meal... (${product.name}, ${date}, ${mealName})`);
     try {
         const response = await got.post(url, options).json();
